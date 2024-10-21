@@ -1,52 +1,54 @@
-use std::path::PathBuf;
-
 use clap::{arg, command, value_parser, ArgAction, Command};
+use git2::Repository;
+use std::path::Path;
 
 fn main() {
-    let matches = command!() // requires `cargo` feature
+    let matches = command!()
         .arg(arg!([name] "Optional name to operate on"))
-        .arg(arg!(
-            -d --debug ... "Turn debugging information on"
-        ))
-        .subcommand(
-            Command::new("test")
-                .about("does testing things")
-                .arg(arg!(-l --list "lists test values").action(ArgAction::SetTrue)),
-        )
         .get_matches();
 
-    // You can check the value provided by positional arguments, or option arguments
-    if let Some(name) = matches.get_one::<String>("name") {
-        println!("Value for name: {name}");
-    }
+    open_remote();
+}
 
-    if let Some(config_path) = matches.get_one::<PathBuf>("config") {
-        println!("Value for config: {}", config_path.display());
-    }
+fn open_remote() {
+    let repo_path = Path::new(".");
 
-    // You can see how many times a particular flag or argument occurred
-    // Note, only flags can have multiple occurrences
-    match matches
-        .get_one::<u8>("debug")
-        .expect("Counts are defaulted")
-    {
-        0 => println!("Debug mode is off"),
-        1 => println!("Debug mode is kind of on"),
-        2 => println!("Debug mode is on"),
-        _ => println!("Don't be crazy"),
-    }
-
-    // You can check for the existence of subcommands, and if found use their
-    // matches just as you would the top level cmd
-    if let Some(matches) = matches.subcommand_matches("test") {
-        // "$ myapp test" was run
-        if matches.get_flag("list") {
-            // "$ myapp test -l" was run
-            println!("Printing testing lists...");
-        } else {
-            println!("Not printing testing lists...");
+    let repo = match Repository::open(repo_path) {
+        Ok(repo) => repo,
+        Err(e) => {
+            eprintln!("Failed to open repository or not in one: {}", e);
+            return;
         }
-    }
+    };
 
-    // Continued program logic goes here...
+    let remote = match repo.find_remote("origin") {
+        Ok(remote) => remote,
+        Err(e) => {
+            eprintln!("Failed to find remote: {}", e);
+            return;
+        }
+    };
+
+    if let Some(url) = remote.url() {
+        println!("Remote URL: {}", url);
+
+        if url.starts_with("http://") || url.starts_with("https://") {
+            println!("Browser URL: {}", url);
+        } else if url.starts_with("git@") {
+            let https_url = url.replace(":", "/").replace("git@", "https://");
+            let https_url = https_url.trim_end_matches(".git");
+            println!("I am about to open this url: {}", https_url);
+            let path = https_url;
+            match open::that(path) {
+                Ok(()) => println!("Opened '{}' successfully.", path),
+                Err(err) => panic!("An error occurred when opening '{}': {}", path, err),
+            }
+        } else if url.starts_with("ssh://") {
+            println!("The URL is using SSH, you might need to convert it manually.");
+        } else {
+            println!("The URL is using another protocol. huh?");
+        }
+    } else {
+        eprintln!("Remote URL not found");
+    }
 }
