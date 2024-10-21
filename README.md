@@ -20,7 +20,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/git-open-rs.git
+git clone https://github.com/rivado-e/git-open-rs.git
 
 # Change directory
 cd git-open-rs
@@ -90,7 +90,7 @@ Contributions are welcome! Here's how you can help:
 2. **Clone Your Fork**:
 
    ```bash
-   git clone https://github.com/yourusername/git-open-rs.git
+   git clone https://github.com/rivado-e/git-open-rs.git
    ```
 
 3. **Create a Branch**:
