@@ -79,7 +79,6 @@ git open [OPTIONS]
 - **GitHub**
 - **GitLab**
 - **Bitbucket**
-- **Azure DevOps**
 - **Custom Git Servers** (basic support)
 
 ## Contributing

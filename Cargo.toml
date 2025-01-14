@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = "1.0.95"
 clap = { version = "4.5.20", features = ["cargo"] }
 git2 = "0.19.0"
 open = "5.3.0"
+
+[[bin]]
+name = "git-open"  # This sets the binary name to 'git-open'
+path = "src/main.rs"
