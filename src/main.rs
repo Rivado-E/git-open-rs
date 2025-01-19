@@ -1,5 +1,5 @@
 use anyhow::Error;
-use clap::{Arg, ArgMatches, Command};
+use clap::{Arg, ArgMatches, Command, ArgAction};
 use git2::Repository;
 use std::path::Path;
 
@@ -88,6 +88,7 @@ fn main() {
         )
         .arg(
             Arg::new("print")
+                .action(ArgAction::SetTrue)
                 .short('p')
                 .long("print")
                 .help("Print the URL instead of opening it"),
@@ -108,7 +109,11 @@ fn main() {
     match get_https_url(&matches, &repo) {
         Ok(url) => {
             let url = add_branch(&repo, url);
-            open_url(&url);
+            if matches.get_flag("print") == true {
+                println!("{}",url);
+            } else {
+                open_url(&url);
+            }
         }
         Err(msg) => {
             eprintln!("{}", msg)
